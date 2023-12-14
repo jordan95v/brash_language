@@ -12,7 +12,7 @@ def print_tree_graph(t):
 def add_node(graph, t):
     my_id = uuid.uuid4()
 
-    if type(t) != tuple:
+    if not isinstance(t, tuple):
         graph.node(str(my_id), label=str(t))
         return my_id
 
