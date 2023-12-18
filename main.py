@@ -4,6 +4,7 @@ import ply.yacc as yacc
 # from tree import print_tree_graph
 
 variables = {}
+functions = {}
 
 reserved = {
     "print": "PRINT",
@@ -17,6 +18,8 @@ reserved = {
     "endwhile": "ENDWHILE",
     "for": "FOR",
     "endfor": "ENDFOR",
+    "function": "FUNCTION",
+    "endfunction": "ENDFUNCTION",
 }
 
 tokens = (
@@ -42,6 +45,7 @@ tokens = (
     "DIVIDEEQUALS",
     "STRING",
     "COMMENT",
+    "COMMA",
 ) + tuple(reserved.values())
 
 precedence = (
@@ -72,6 +76,7 @@ t_MINUSEQUALS = r"-="
 t_TIMESEQUALS = r"\*="
 t_DIVIDEEQUALS = r"/="
 t_STRING = r"(\"|\')[a-zA-Z_][a-zA-Z0-9_]+(\"|\')"
+t_COMMA = r","
 
 
 def t_NUMBER(t):
@@ -140,15 +145,27 @@ def t_ENDFOR(t):
     return t
 
 
-def t_COMMENT(t):
-    r"\/\/.*"
-    pass
-
-
 def t_EXIT(t):
     r"exit"
     t.type = reserved.get(t.value, "EXIT")
     return t
+
+
+def t_FUNCTION(t):
+    r"function"
+    t.type = reserved.get(t.value, "FUNCTION")
+    return t
+
+
+def t_ENDFUNCTION(t):
+    r"endfunction"
+    t.type = reserved.get(t.value, "ENDFUNCTION")
+    return t
+
+
+def t_COMMENT(t):
+    r"\/\/.*"
+    pass
 
 
 def t_error(t):
@@ -163,6 +180,10 @@ def t_newline(t):
 
 def exec_bloc(bloc):
     match (bloc[0]):
+        case "function":
+            functions[bloc[1]] = (bloc[2], bloc[3])
+        case "function_call":
+            exec_function_call(bloc[1], bloc[2])
         case "assign":
             variables[bloc[1]] = exec_expression(bloc[2])
         case "increment":
@@ -188,6 +209,36 @@ def exec_bloc(bloc):
         case "bloc":
             exec_bloc(bloc[1])
             exec_bloc(bloc[2])
+
+
+def get_height(parameters):
+    if parameters[1] == "empty":
+        return 0
+    return 1 + get_height(parameters[1])
+
+
+def exec_get_signature(parameters, arguments, func_dict):
+    func_dict[parameters[2]] = exec_expression(arguments[2])
+    if parameters[1] == "empty":
+        return func_dict
+    return exec_get_signature(parameters[1], arguments[1], func_dict)
+
+
+def exec_function_call(name, arguments):
+    try:
+        parameters, bloc = functions[name]
+    except KeyError:
+        raise Exception("Function not found")
+    if get_height(parameters) != get_height(arguments):
+        raise Exception("Wrong number of arguments, check the function signature")
+    variables_functions = {}
+    exec_get_signature(parameters, arguments, variables_functions)
+    variables_copy = variables.copy()
+    variables.clear()
+    variables.update(variables_functions)
+    exec_bloc(bloc)
+    variables.clear()
+    variables.update(variables_copy)
 
 
 def exec_increment(name, expression):
@@ -270,10 +321,44 @@ def p_statement_print(p):
     p[0] = ("print", p[3])
 
 
-def p_statement_assign(p):
-    "statement : NAME EQUALS expression"
+def p_statement_parameters(p):
+    """FUNC_PARAMETERS : FUNC_PARAMETERS COMMA NAME
+    | NAME"""
 
-    p[0] = ("assign", p[1], p[3])
+    if len(p) == 2:
+        p[0] = ("parameters", "empty", p[1])
+    else:
+        p[0] = ("parameters", p[1], p[3])
+
+
+def p_statement_function(p):
+    """statement : FUNCTION NAME LPAREN FUNC_PARAMETERS RPAREN bloc ENDFUNCTION
+    | FUNCTION NAME LPAREN RPAREN bloc ENDFUNCTION"""
+
+    if len(p) == 7:
+        p[0] = ("function", p[2], "empty", p[5])
+    else:
+        p[0] = ("function", p[2], p[4], p[6])
+
+
+def p_statement_call_arguments(p):
+    """CALL_ARGUMENTS : CALL_ARGUMENTS COMMA expression
+    | expression"""
+
+    if len(p) == 2:
+        p[0] = ("call_arguments", "empty", p[1])
+    else:
+        p[0] = ("call_arguments", p[1], p[3])
+
+
+def p_statement_function_call(p):
+    """statement : NAME LPAREN CALL_ARGUMENTS RPAREN
+    | NAME LPAREN RPAREN"""
+
+    if len(p) == 4:
+        p[0] = ("function_call", p[1], "empty")
+    else:
+        p[0] = ("function_call", p[1], p[3])
 
 
 def p_if_statement(p):
@@ -286,26 +371,41 @@ def p_if_statement(p):
         p[0] = ("if", p[2], p[4], p[6])
 
 
-def p_while_statement(p):
+def p_statement_while(p):
     "statement : WHILE expression DO bloc ENDWHILE"
 
     p[0] = ("while", p[2], p[4])
 
 
-def p_for_statement(p):
+def p_statement_for(p):
     "statement : FOR statement SEMICOLON expression SEMICOLON statement DO bloc ENDFOR"
 
     p[0] = ("for", p[2], p[4], p[6], p[8])
 
 
-def p_statement_plusplus_minusminus(p):
+def p_statement_increment(p):
     """statement : NAME PLUSPLUS
     | NAME MINUSMINUS"""
 
     p[0] = ("increment", p[1], (p[2], p[1]))
 
 
-def p_expression_binop_calc(p):
+def p_statement_assign(p):
+    "statement : NAME EQUALS expression"
+
+    p[0] = ("assign", p[1], p[3])
+
+
+def p_statement_fast_assign(p):
+    """statement : NAME PLUSEQUALS expression
+    | NAME MINUSEQUALS expression
+    | NAME TIMESEQUALS expression
+    | NAME DIVIDEEQUALS expression"""
+
+    p[0] = ("fast_assign", p[1], (p[2], p[1], p[3]))
+
+
+def p_expression_calc(p):
     """expression : expression PLUS expression
     | expression TIMES expression
     | expression MINUS expression
@@ -316,15 +416,6 @@ def p_expression_binop_calc(p):
     | expression LESSER expression"""
 
     p[0] = (p[2], p[1], p[3])
-
-
-def p_statement_someequals(p):
-    """statement : NAME PLUSEQUALS expression
-    | NAME MINUSEQUALS expression
-    | NAME TIMESEQUALS expression
-    | NAME DIVIDEEQUALS expression"""
-
-    p[0] = ("fast_assign", p[1], (p[2], p[1], p[3]))
 
 
 def p_expression_name(p):
@@ -346,8 +437,7 @@ def p_expression_number(p):
 parser = yacc.yacc()
 lexer = lex.lex()
 
-a = yacc.parse("print(1+1);a=2+3;b=a+10;c=b;b++;print(a+2);print('hello');")  # type: ignore
-print(variables)
+a = yacc.parse("a=2;function test(a, b) print(a+b); endfunction; test(a,2);")  # type: ignore
 # a = yacc.parse("if 1<2 then a=5;b=0; endif;")  # type: ignore
 # print(variables)
 # a = yacc.parse("while b<a do b++;print(1); endwhile;")  # type: ignore
