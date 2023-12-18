@@ -212,7 +212,12 @@ def exec_fast_assign(name, expression):
 
 def exec_expression(expression):
     if isinstance(expression, str):
-        return variables[expression]
+        try:
+            return variables[expression]
+        except KeyError:
+            if expression.count('"') == 2 or expression.count("'") == 2:
+                return expression[1:-1]
+            raise Exception("Variable not found")
     if not isinstance(expression, tuple):
         return expression
     match (expression[0]):
@@ -341,11 +346,11 @@ def p_expression_number(p):
 parser = yacc.yacc()
 lexer = lex.lex()
 
-a = yacc.parse("print(1+1);a=2+3;b=a+10;c=b;b++;print(a+2);")  # type: ignore
+a = yacc.parse("print(1+1);a=2+3;b=a+10;c=b;b++;print(a+2);print('hello');")  # type: ignore
 print(variables)
-a = yacc.parse("if 1<2 then a=5;b=0; endif;")  # type: ignore
-print(variables)
-a = yacc.parse("while b<a do b++;print(1); endwhile;")  # type: ignore
-print(variables)
-a = yacc.parse("for a=0; a<10; a++ do print(a); endfor;")  # type: ignore
-print(variables)
+# a = yacc.parse("if 1<2 then a=5;b=0; endif;")  # type: ignore
+# print(variables)
+# a = yacc.parse("while b<a do b++;print(1); endwhile;")  # type: ignore
+# print(variables)
+# a = yacc.parse("for a=0; a<10; a++ do print(a); endfor;")  # type: ignore
+# print(variables)
