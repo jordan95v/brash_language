@@ -3,9 +3,18 @@ import ply.yacc as yacc
 
 # from tree import print_tree_graph
 
+from dataclasses import dataclass
+
+
+@dataclass
+class Config:
+    in_function: bool = False
+    returned: bool = False
+
+
 variables = {}
 functions = {}
-
+config = Config()
 
 reserved = {
     "print": "PRINT",
@@ -77,7 +86,7 @@ t_PLUSEQUALS = r"\+="
 t_MINUSEQUALS = r"-="
 t_TIMESEQUALS = r"\*="
 t_DIVIDEEQUALS = r"/="
-t_STRING = r"(\"|\')[a-zA-Z_][a-zA-Z0-9_]+(\"|\')"
+t_STRING = r"(\"|\').*(\"|\')"
 t_COMMA = r","
 
 
@@ -187,10 +196,15 @@ def t_newline(t):
 
 
 def exec_bloc(bloc):
+    if config.returned and config.in_function:
+        return
     match (bloc[0]):
         case "function":
             functions[bloc[1]] = (bloc[2], bloc[3])
+        case "call":
+            return exec_function_call(bloc[1], bloc[2])
         case "return":
+            config.returned = True
             return exec_expression(bloc[1])
         case "assign":
             variables[bloc[1]] = exec_expression(bloc[2])
@@ -216,8 +230,8 @@ def exec_bloc(bloc):
                 exec_bloc(bloc[3])
         case "bloc":
             ret = exec_bloc(bloc[1])
-            exec_bloc(bloc[2])
-            return ret
+            ret_ = exec_bloc(bloc[2])
+            return ret or ret_
 
 
 def get_height(parameters):
@@ -245,7 +259,10 @@ def exec_function_call(name, arguments):
     variables_copy = variables.copy()
     variables.clear()
     variables.update(variables_functions)
+    config.in_function = True
     a = exec_bloc(bloc)
+    config.returned = False
+    config.in_function = False
     variables.clear()
     variables.update(variables_copy)
     return a
@@ -311,7 +328,8 @@ def p_start(p):
 
 def p_bloc(p):
     """bloc : statement SEMICOLON
-    | bloc statement SEMICOLON"""
+    | bloc statement SEMICOLON
+    | expression SEMICOLON"""
 
     if len(p) == 3:
         p[0] = ("bloc", p[1], "empty")
@@ -397,7 +415,7 @@ def p_statement_function(p):
         p[0] = ("function", p[2], p[4], p[6])
 
 
-def p_statement_function_call(p):
+def p_statement_call(p):
     """expression : NAME LPAREN arguments RPAREN
     | NAME LPAREN RPAREN"""
 
