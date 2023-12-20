@@ -6,6 +6,7 @@ import ply.yacc as yacc
 variables = {}
 functions = {}
 
+
 reserved = {
     "print": "PRINT",
     "exit": "EXIT",
@@ -20,6 +21,7 @@ reserved = {
     "endfor": "ENDFOR",
     "function": "FUNCTION",
     "endfunction": "ENDFUNCTION",
+    "return": "RETURN",
 }
 
 tokens = (
@@ -163,6 +165,12 @@ def t_ENDFUNCTION(t):
     return t
 
 
+def t_RETURN(t):
+    r"return"
+    t.type = reserved.get(t.value, "RETURN")
+    return t
+
+
 def t_COMMENT(t):
     r"\/\/.*"
     pass
@@ -182,8 +190,8 @@ def exec_bloc(bloc):
     match (bloc[0]):
         case "function":
             functions[bloc[1]] = (bloc[2], bloc[3])
-        case "function_call":
-            exec_function_call(bloc[1], bloc[2])
+        case "return":
+            return exec_expression(bloc[1])
         case "assign":
             variables[bloc[1]] = exec_expression(bloc[2])
         case "increment":
@@ -207,8 +215,9 @@ def exec_bloc(bloc):
                 exec_bloc(bloc[4])
                 exec_bloc(bloc[3])
         case "bloc":
-            exec_bloc(bloc[1])
+            ret = exec_bloc(bloc[1])
             exec_bloc(bloc[2])
+            return ret
 
 
 def get_height(parameters):
@@ -236,9 +245,10 @@ def exec_function_call(name, arguments):
     variables_copy = variables.copy()
     variables.clear()
     variables.update(variables_functions)
-    exec_bloc(bloc)
+    a = exec_bloc(bloc)
     variables.clear()
     variables.update(variables_copy)
+    return a
 
 
 def exec_increment(name, expression):
@@ -288,6 +298,8 @@ def exec_expression(expression):
             return exec_expression(expression[1]) > exec_expression(expression[2])
         case "<":
             return exec_expression(expression[1]) < exec_expression(expression[2])
+        case "call":
+            return exec_function_call(expression[1], expression[2])
 
 
 def p_start(p):
@@ -307,6 +319,9 @@ def p_bloc(p):
         p[0] = ("bloc", p[1], p[2])
 
 
+### Utils
+
+
 def p_statement_exit(p):
     "statement : EXIT"
 
@@ -321,44 +336,7 @@ def p_statement_print(p):
     p[0] = ("print", p[3])
 
 
-def p_statement_parameters(p):
-    """FUNC_PARAMETERS : FUNC_PARAMETERS COMMA NAME
-    | NAME"""
-
-    if len(p) == 2:
-        p[0] = ("parameters", "empty", p[1])
-    else:
-        p[0] = ("parameters", p[1], p[3])
-
-
-def p_statement_function(p):
-    """statement : FUNCTION NAME LPAREN FUNC_PARAMETERS RPAREN bloc ENDFUNCTION
-    | FUNCTION NAME LPAREN RPAREN bloc ENDFUNCTION"""
-
-    if len(p) == 7:
-        p[0] = ("function", p[2], "empty", p[5])
-    else:
-        p[0] = ("function", p[2], p[4], p[6])
-
-
-def p_statement_call_arguments(p):
-    """CALL_ARGUMENTS : CALL_ARGUMENTS COMMA expression
-    | expression"""
-
-    if len(p) == 2:
-        p[0] = ("call_arguments", "empty", p[1])
-    else:
-        p[0] = ("call_arguments", p[1], p[3])
-
-
-def p_statement_function_call(p):
-    """statement : NAME LPAREN CALL_ARGUMENTS RPAREN
-    | NAME LPAREN RPAREN"""
-
-    if len(p) == 4:
-        p[0] = ("function_call", p[1], "empty")
-    else:
-        p[0] = ("function_call", p[1], p[3])
+### Conditions
 
 
 def p_if_statement(p):
@@ -371,6 +349,9 @@ def p_if_statement(p):
         p[0] = ("if", p[2], p[4], p[6])
 
 
+### Loops
+
+
 def p_statement_while(p):
     "statement : WHILE expression DO bloc ENDWHILE"
 
@@ -381,6 +362,58 @@ def p_statement_for(p):
     "statement : FOR statement SEMICOLON expression SEMICOLON statement DO bloc ENDFOR"
 
     p[0] = ("for", p[2], p[4], p[6], p[8])
+
+
+### Functions
+
+
+def p_statement_parameters(p):
+    """parameters : parameters COMMA NAME
+    | NAME"""
+
+    if len(p) == 2:
+        p[0] = ("parameters", "empty", p[1])
+    else:
+        p[0] = ("parameters", p[1], p[3])
+
+
+def p_statement_call_arguments(p):
+    """arguments : arguments COMMA expression
+    | expression"""
+
+    if len(p) == 2:
+        p[0] = ("arguments", "empty", p[1])
+    else:
+        p[0] = ("arguments", p[1], p[3])
+
+
+def p_statement_function(p):
+    """statement : FUNCTION NAME LPAREN parameters RPAREN bloc ENDFUNCTION
+    | FUNCTION NAME LPAREN RPAREN bloc ENDFUNCTION"""
+
+    if len(p) == 7:
+        p[0] = ("function", p[2], "empty", p[5])
+    else:
+        p[0] = ("function", p[2], p[4], p[6])
+
+
+def p_statement_function_call(p):
+    """expression : NAME LPAREN arguments RPAREN
+    | NAME LPAREN RPAREN"""
+
+    if len(p) == 4:
+        p[0] = ("call", p[1], "empty")
+    else:
+        p[0] = ("call", p[1], p[3])
+
+
+def p_statement_return(p):
+    "statement : RETURN expression"
+
+    p[0] = ("return", p[2])
+
+
+### Assignments
 
 
 def p_statement_increment(p):
@@ -403,6 +436,9 @@ def p_statement_fast_assign(p):
     | NAME DIVIDEEQUALS expression"""
 
     p[0] = ("fast_assign", p[1], (p[2], p[1], p[3]))
+
+
+### Expressions
 
 
 def p_expression_calc(p):
@@ -437,7 +473,9 @@ def p_expression_number(p):
 parser = yacc.yacc()
 lexer = lex.lex()
 
-a = yacc.parse("a=2;function test(a, b) print(a+b); endfunction; test(a,2);")  # type: ignore
+from pathlib import Path
+
+a = yacc.parse(Path("main.brash").read_text())  # type: ignore
 # a = yacc.parse("if 1<2 then a=5;b=0; endif;")  # type: ignore
 # print(variables)
 # a = yacc.parse("while b<a do b++;print(1); endwhile;")  # type: ignore

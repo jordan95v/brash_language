@@ -1,0 +1,10 @@
+a = 5;
+
+function calculate(a, i)
+    return a + i;
+endfunction;
+
+for i = 0; i < a; i++
+do 
+    print(calculate(a, i));
+endfor;
