@@ -353,6 +353,10 @@ def p_bloc(p):
         p[0] = ("bloc", p[1], p[2])
 
 
+def p_error(p):
+    print(f"Syntax error at {p.value}")
+
+
 ### Utils
 
 
@@ -368,6 +372,11 @@ def p_statement_print(p):
     | PRINT LPAREN STRING RPAREN"""
 
     p[0] = ("print", p[3])
+
+
+def p_statement_comment(p):
+    "statement : COMMENT"
+    pass
 
 
 ### Conditions

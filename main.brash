@@ -8,6 +8,8 @@ function calculate(a, i)
     print("goodbye you");
 endfunction;
 
+// This is a comment
+
 for i = 0; i < 5; i++
 do 
     calculate(my_global_var, i);
