@@ -3,13 +3,12 @@ global my_global_var;
 
 function calculate(a, i)
     print('hello you');
-    print(my_global_var);
     return a + i;
-    print("goodbye you");
 endfunction;
 
 // This is a comment
 
+b = [2, 3];
 for i = 0; i < 5; i++
 do 
     calculate(my_global_var, i);

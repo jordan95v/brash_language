@@ -59,6 +59,8 @@ tokens = (
     "STRING",
     "COMMENT",
     "COMMA",
+    "LEFT_ARRAY",
+    "RIGHT_ARRAY",
 ) + tuple(reserved.values())
 
 precedence = (
@@ -90,6 +92,8 @@ t_TIMESEQUALS = r"\*="
 t_DIVIDEEQUALS = r"/="
 t_STRING = r"(\"|\').*(\"|\')"
 t_COMMA = r","
+t_LEFT_ARRAY = r"\["
+t_RIGHT_ARRAY = r"\]"
 
 
 def t_NUMBER(t):
@@ -220,6 +224,10 @@ def exec_bloc(bloc):
             global_variables[bloc[1]] = exec_expression(bloc[2])
         case "global_exist":
             global_variables[bloc[1]] = variables[bloc[1]]
+        case "array":
+            new_list = exec_assign_array([], bloc[2])
+            new_list.reverse()
+            variables[bloc[1]] = new_list
         case "increment":
             exec_increment(bloc[1], bloc[2])
         case "fast_assign":
@@ -278,6 +286,13 @@ def exec_function_call(name, arguments):
     variables.clear()
     variables.update(variables_copy)
     return a
+
+
+def exec_assign_array(values, arguments):
+    values.append(exec_expression(arguments[2]))
+    if arguments[1] == "empty":
+        return values
+    return exec_assign_array(values, arguments[1])
 
 
 def exec_increment(name, expression):
@@ -482,6 +497,17 @@ def p_statement_global(p):
     "statement : GLOBAL NAME EQUALS expression"
 
     p[0] = ("global_new", p[2], p[4])
+
+
+def p_statement_array(p):
+    """statement : NAME EQUALS LEFT_ARRAY arguments RIGHT_ARRAY
+    | NAME EQUALS LEFT_ARRAY RIGHT_ARRAY
+    """
+
+    if isinstance(p[4], tuple):
+        p[0] = ("array", p[1], p[4])
+    else:
+        p[0] = ("array", p[1], "empty")
 
 
 def p_statement_fast_assign(p):
