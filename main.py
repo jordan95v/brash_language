@@ -276,11 +276,14 @@ def exec_function_call(name, arguments):
     except KeyError:
         print(f"Function {name} not found")
         exit()
-    if get_height(parameters) != get_height(arguments):
+    if arguments == "empty" and parameters == "empty":
+        pass
+    elif get_height(parameters) != get_height(arguments):
         print(f"Wrong number of arguments for function {name}")
         exit()
     variables_functions = {}
-    exec_get_signature(parameters, arguments, variables_functions)
+    if arguments != "empty" and parameters != "empty":
+        exec_get_signature(parameters, arguments, variables_functions)
     variables_copy = variables.copy()
     variables.clear()
     variables.update(variables_functions)
@@ -380,7 +383,6 @@ def exec_expression(expression):
                     print(f"Variable {expression[1]}{error_list_str} not found")
                     exit()
             return value
-
         case "array":
             new_list = exec_assign_array([], expression[1])
             new_list.reverse()
