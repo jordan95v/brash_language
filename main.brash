@@ -1,13 +1,14 @@
-a = 5;
+my_global_var = 578976;
+global my_global_var;
 
 function calculate(a, i)
     print('hello you');
+    print(my_global_var);
     return a + i;
     print("goodbye you");
 endfunction;
 
-for i = 0; i < a; i++
+for i = 0; i < 5; i++
 do 
-    b = calculate(a, i);
-    print(b);
+    calculate(my_global_var, i);
 endfor;

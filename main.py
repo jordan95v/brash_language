@@ -13,6 +13,7 @@ class Config:
 
 
 variables = {}
+global_variables = {}
 functions = {}
 config = Config()
 
@@ -31,6 +32,7 @@ reserved = {
     "function": "FUNCTION",
     "endfunction": "ENDFUNCTION",
     "return": "RETURN",
+    "global": "GLOBAL",
 }
 
 tokens = (
@@ -185,6 +187,12 @@ def t_COMMENT(t):
     pass
 
 
+def t_GLOBAL(t):
+    r"global"
+    t.type = reserved.get(t.value, "GLOBAL")
+    return t
+
+
 def t_error(t):
     print("Illegal character '%s'" % t.value[0])
     t.lexer.skip(1)
@@ -208,6 +216,10 @@ def exec_bloc(bloc):
             return exec_expression(bloc[1])
         case "assign":
             variables[bloc[1]] = exec_expression(bloc[2])
+        case "global_new":
+            global_variables[bloc[1]] = exec_expression(bloc[2])
+        case "global_exist":
+            global_variables[bloc[1]] = variables[bloc[1]]
         case "increment":
             exec_increment(bloc[1], bloc[2])
         case "fast_assign":
@@ -293,6 +305,10 @@ def exec_expression(expression):
         try:
             return variables[expression]
         except KeyError:
+            try:
+                return global_variables[expression]
+            except KeyError:
+                pass
             if expression.count('"') == 2 or expression.count("'") == 2:
                 return expression[1:-1]
             raise Exception("Variable not found")
@@ -445,6 +461,18 @@ def p_statement_assign(p):
     "statement : NAME EQUALS expression"
 
     p[0] = ("assign", p[1], p[3])
+
+
+def p_statement_global_exists(p):
+    "statement : GLOBAL NAME"
+
+    p[0] = ("global_exist", p[2])
+
+
+def p_statement_global(p):
+    "statement : GLOBAL NAME EQUALS expression"
+
+    p[0] = ("global_new", p[2], p[4])
 
 
 def p_statement_fast_assign(p):
