@@ -1,6 +1,3 @@
-my_global_var = 578976;
-global my_global_var;
-
 function dunno()
     print("dunno");
 endfunction;
@@ -11,12 +8,4 @@ function calculate(a, i)
     return a + i;
 endfunction;
 
-// This is a comment
-
-b = [2, 1, [1, [4, 7]]];
-print(b[2][1][0]);
-
-for i = 0; i < 5; i++
-do 
-    calculate(my_global_var, i);
-endfor;
+calculate(1, 2);

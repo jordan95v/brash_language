@@ -258,16 +258,16 @@ def exec_bloc(bloc):
 
 
 def get_height(parameters):
-    if parameters[1] == "empty":
+    if parameters[2] == "empty":
         return 0
-    return 1 + get_height(parameters[1])
+    return 1 + get_height(parameters[2])
 
 
 def exec_get_signature(parameters, arguments, func_dict):
-    func_dict[parameters[2]] = exec_expression(arguments[2])
-    if parameters[1] == "empty":
+    func_dict[parameters[1]] = exec_expression(arguments[1])
+    if parameters[2] == "empty":
         return func_dict
-    return exec_get_signature(parameters[1], arguments[1], func_dict)
+    return exec_get_signature(parameters[2], arguments[2], func_dict)
 
 
 def exec_function_call(name, arguments):
@@ -399,7 +399,8 @@ def p_start(p):
 def p_bloc(p):
     """bloc : statement SEMICOLON
     | bloc statement SEMICOLON
-    | expression SEMICOLON"""
+    | expression SEMICOLON
+    | bloc expression SEMICOLON"""
 
     if len(p) == 3:
         p[0] = ("bloc", p[1], "empty")
@@ -469,9 +470,9 @@ def p_statement_parameters(p):
     | NAME"""
 
     if len(p) == 2:
-        p[0] = ("parameters", "empty", p[1])
+        p[0] = ("parameters", p[1], "empty")
     else:
-        p[0] = ("parameters", p[1], p[3])
+        p[0] = ("parameters", p[3], p[1])
 
 
 def p_statement_call_arguments(p):
@@ -479,9 +480,9 @@ def p_statement_call_arguments(p):
     | expression"""
 
     if len(p) == 2:
-        p[0] = ("arguments", "empty", p[1])
+        p[0] = ("arguments", p[1], "empty")
     else:
-        p[0] = ("arguments", p[1], p[3])
+        p[0] = ("arguments", p[3], p[1])
 
 
 def p_statement_function(p):
