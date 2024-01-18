@@ -18,6 +18,7 @@ Ce dernier prend inspiration du langage Bash et du python.
     - [Boucle for](#boucle-for)
   - [Fonctions](#fonctions)
   - [Commentaires](#commentaires)
+  - [Exemple de code complet](#exemple-de-code-complet)
 
 
 # Exemple de code Brash
@@ -92,10 +93,11 @@ then
     print("my_first_var is equal to 5");
 else
     print("my_first_var is not equal to 5");
-endif
+endif;
 ```
 
 La construction d'une condition utilise les mots clés `if`, `then` et `else`.
+Il est possible d'imbriquer des conditions, et de ne pas mettre de `else`.
 
 ## Boucles
 
@@ -106,7 +108,7 @@ while my_first_var < 10
 do
     print(my_first_var);
     my_first_var++;
-endwhile
+endwhile;
 ```
 
 Tant que la condition est vraie, on exécute le code dans la boucle.
@@ -117,7 +119,7 @@ Tant que la condition est vraie, on exécute le code dans la boucle.
 for i=0; i<10; i++
 do
     print(i);
-endfor
+endfor;
 ```
 
 Le premier paramètre est le bloc d'initialisation, le deuxième est la condition et le troisième est le bloc d'incrémentation.
@@ -129,13 +131,13 @@ Bloc fait référence au code entre les `;`.
 // Fonction sans paramètres
 function my_function()
     print("Hello world");
-endfunction
+endfunction;
 
 
 // Fonction avec paramètres
 function calculate(a, b)
     return a + b;
-endfunction
+endfunction;
 ```
 
 Les fonctions sont déclarées avec le mot clé `function` et se termine avec le mot clé `endfunction`.
@@ -148,3 +150,20 @@ Les paramètres sont séparés par des virgules.
 ```
 
 Les commentaires sur une ligne sont précédés par `//`.
+
+## Exemple de code complet
+
+Voici un code qui permet de calculer la somme des nombres de 1 à 10.
+
+```
+sum = 0;
+
+for i = 1; i < 20; i++
+do
+    if i < 10
+    then
+        sum += i;
+    endif;
+endfor;
+print(sum);
+```
