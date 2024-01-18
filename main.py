@@ -271,9 +271,11 @@ def exec_function_call(name, arguments):
     try:
         parameters, bloc = functions[name]
     except KeyError:
-        raise Exception("Function not found")
+        print(f"Function {name} not found")
+        exit()
     if get_height(parameters) != get_height(arguments):
-        raise Exception("Wrong number of arguments, check the function signature")
+        print(f"Wrong number of arguments for function {name}")
+        exit()
     variables_functions = {}
     exec_get_signature(parameters, arguments, variables_functions)
     variables_copy = variables.copy()
@@ -326,7 +328,8 @@ def exec_expression(expression):
                 pass
             if expression.count('"') == 2 or expression.count("'") == 2:
                 return expression[1:-1]
-            raise Exception("Variable not found")
+            print(f"Variable {expression} not found")
+            exit()
     if not isinstance(expression, tuple):
         return expression
     match (expression[0]):
@@ -348,6 +351,15 @@ def exec_expression(expression):
             return exec_expression(expression[1]) < exec_expression(expression[2])
         case "call":
             return exec_function_call(expression[1], expression[2])
+        case "array_get":
+            try:
+                return variables[expression[1]][exec_expression(expression[2])]
+            except KeyError:
+                print(f"Variable {expression[1]} not found")
+                exit()
+            except IndexError:
+                print(f"Index out of range for list {expression[1]}")
+                exit()
 
 
 def p_start(p):
@@ -520,6 +532,12 @@ def p_statement_fast_assign(p):
 
 
 ### Expressions
+
+
+def p_expression_array(p):
+    "expression : NAME LEFT_ARRAY expression RIGHT_ARRAY"
+
+    p[0] = ("array_get", p[1], p[3])
 
 
 def p_expression_calc(p):

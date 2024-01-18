@@ -8,7 +8,9 @@ endfunction;
 
 // This is a comment
 
-b = [2, 3];
+b = [2, 1];
+print(b[1]);
+
 for i = 0; i < 5; i++
 do 
     calculate(my_global_var, i);
