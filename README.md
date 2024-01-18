@@ -11,6 +11,7 @@ Ce dernier prend inspiration du langage Bash et du python.
   - [Déclaration et affichage de variable](#déclaration-et-affichage-de-variable)
   - [Variables globales et locales](#variables-globales-et-locales)
   - [Opérateurs et sucre syntaxique](#opérateurs-et-sucre-syntaxique)
+  - [Tableaux](#tableaux)
   - [Conditions](#conditions)
   - [Boucles](#boucles)
     - [Boucle while](#boucle-while)
@@ -70,6 +71,18 @@ my_first_var--; // my_first_var = 5
 Les opérateurs `+=`, `-=`, `*=`, `/=` permettent de faire une opération et d'affecter le résultat à la variable.
 On appelle ça du sucre syntaxique.
 Les opérateurs `++` et `--` permettent d'incrémenter ou de décrémenter une variable.
+
+## Tableaux
+
+```
+my_first_array = [1, 2, 3, 4, 5];
+print(my_first_array[0]); // Affiche 1
+```
+
+Les tableaux sont déclarés avec des crochets `[]`. Ils peuvent contenir des nombres, des chaînes de caractères ou la valeur de variables.
+Pour accéder à une valeur, on utilise des crochets `[]` après le nom du tableau et on met l'index de la valeur à l'intérieur.
+Les index commencent à 0.
+Les tableaux ont une taille fixe, mais sont multidimensionnels.
 
 ## Conditions
 

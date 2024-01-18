@@ -228,6 +228,9 @@ def exec_bloc(bloc):
             new_list = exec_assign_array([], bloc[2])
             new_list.reverse()
             variables[bloc[1]] = new_list
+            print(variables)
+        case "array_assign":
+            variables[bloc[1]][exec_expression(bloc[2])] = exec_expression(bloc[3])
         case "increment":
             exec_increment(bloc[1], bloc[2])
         case "fast_assign":
@@ -297,6 +300,13 @@ def exec_assign_array(values, arguments):
     return exec_assign_array(values, arguments[1])
 
 
+def exec_index_array(values, indexs):
+    values.append(exec_expression(indexs[1][2]))
+    if indexs[2] == "empty":
+        return values
+    return exec_index_array(values, indexs[2])
+
+
 def exec_increment(name, expression):
     match (expression[0]):
         case "++":
@@ -352,14 +362,29 @@ def exec_expression(expression):
         case "call":
             return exec_function_call(expression[1], expression[2])
         case "array_get":
-            try:
-                return variables[expression[1]][exec_expression(expression[2])]
-            except KeyError:
-                print(f"Variable {expression[1]} not found")
-                exit()
-            except IndexError:
-                print(f"Index out of range for list {expression[1]}")
-                exit()
+            new_list = exec_index_array([], expression[2])
+            value = variables[expression[1]]
+            for i in new_list:
+                try:
+                    value = value[i]
+                except KeyError:
+                    try:
+                        value = global_variables[expression[1]][i]
+                    except KeyError:
+                        print(f"Variable {expression[1]} not found")
+                        exit()
+                except TypeError:
+                    error_list_str = ""
+                    for i in new_list:
+                        error_list_str += f"[{i}]"
+                    print(f"Variable {expression[1]}{error_list_str} not found")
+                    exit()
+            return value
+
+        case "array":
+            new_list = exec_assign_array([], expression[1])
+            new_list.reverse()
+            return new_list
 
 
 def p_start(p):
@@ -522,6 +547,12 @@ def p_statement_array(p):
         p[0] = ("array", p[1], "empty")
 
 
+def p_statement_array_assign(p):
+    "statement : NAME LEFT_ARRAY expression RIGHT_ARRAY EQUALS expression"
+
+    p[0] = ("array_assign", p[1], p[3], p[6])
+
+
 def p_statement_fast_assign(p):
     """statement : NAME PLUSEQUALS expression
     | NAME MINUSEQUALS expression
@@ -535,9 +566,25 @@ def p_statement_fast_assign(p):
 
 
 def p_expression_array(p):
-    "expression : NAME LEFT_ARRAY expression RIGHT_ARRAY"
+    "expression : LEFT_ARRAY arguments RIGHT_ARRAY"
 
-    p[0] = ("array_get", p[1], p[3])
+    p[0] = ("array", p[2], "empty")
+
+
+def p_expression_array_index(p):
+    """index : LEFT_ARRAY arguments RIGHT_ARRAY index
+    | LEFT_ARRAY arguments RIGHT_ARRAY"""
+
+    if len(p) == 5:
+        p[0] = ("index", p[2], p[4])
+    else:
+        p[0] = ("index", p[2], "empty")
+
+
+def p_expression_array_get(p):
+    "expression : NAME index"
+
+    p[0] = ("array_get", p[1], p[2])
 
 
 def p_expression_calc(p):

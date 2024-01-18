@@ -8,8 +8,8 @@ endfunction;
 
 // This is a comment
 
-b = [2, 1];
-print(b[1]);
+b = [2, 1, [1, [4, 7]]];
+print(b[2][1][0]);
 
 for i = 0; i < 5; i++
 do 
