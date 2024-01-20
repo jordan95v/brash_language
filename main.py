@@ -53,6 +53,7 @@ tokens = (
     "EQUALSEQUALS",
     "GREATEREQUALS",
     "LESSEREQUALS",
+    "NOTEQUALS",
     "PLUSPLUS",
     "MINUSMINUS",
     "PLUSEQUALS",
@@ -89,6 +90,7 @@ t_LESSER = r"<"
 t_EQUALSEQUALS = r"=="
 t_GREATEREQUALS = r">="
 t_LESSEREQUALS = r"<="
+t_NOTEQUALS = r"!="
 t_PLUSPLUS = r"\+\+"
 t_MINUSMINUS = r"--"
 t_PLUSEQUALS = r"\+="
@@ -365,6 +367,7 @@ def exec_expression(expression):
             exit()
     if not isinstance(expression, tuple):
         return expression
+    print(expression)
     match (expression[0]):
         case "+":
             return exec_expression(expression[1]) + exec_expression(expression[2])
@@ -388,6 +391,8 @@ def exec_expression(expression):
             return exec_expression(expression[1]) >= exec_expression(expression[2])
         case "<=":
             return exec_expression(expression[1]) <= exec_expression(expression[2])
+        case "!=":
+            return exec_expression(expression[1]) != exec_expression(expression[2])
         case "call":
             return exec_function_call(expression[1], expression[2])
         case "array_get":
@@ -635,6 +640,7 @@ def p_expression_calc(p):
     | expression EQUALSEQUALS expression
     | expression GREATEREQUALS expression
     | expression LESSEREQUALS expression
+    | expression NOTEQUALS expression
     """
 
     p[0] = (p[2], p[1], p[3])

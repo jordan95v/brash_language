@@ -11,6 +11,7 @@ Ce dernier prend inspiration du langage Bash et du python.
   - [Déclaration et affichage de variable](#déclaration-et-affichage-de-variable)
   - [Variables globales et locales](#variables-globales-et-locales)
   - [Opérateurs et sucre syntaxique](#opérateurs-et-sucre-syntaxique)
+    - [Opérateurs de comparaison](#opérateurs-de-comparaison)
   - [Tableaux](#tableaux)
   - [Conditions](#conditions)
   - [Boucles](#boucles)
@@ -39,6 +40,12 @@ print(my_first_var);
 ```
 
 Code basique qui permet d'initialiser une variable et de l'afficher.
+
+```
+my_first_var, my_second_var = 5, 10;
+```
+
+Il est possible d'initialiser plusieurs variables en même temps.
 
 ## Variables globales et locales
 
@@ -73,10 +80,27 @@ Les opérateurs `+=`, `-=`, `*=`, `/=` permettent de faire une opération et d'a
 On appelle ça du sucre syntaxique.
 Les opérateurs `++` et `--` permettent d'incrémenter ou de décrémenter une variable.
 
+### Opérateurs de comparaison
+
+```
+my_first_var = 5;
+my_second_var = 10;
+
+my_first_var == my_second_var; // false
+my_first_var != my_second_var; // true
+my_first_var < my_second_var; // true
+my_first_var > my_second_var; // false
+my_first_var <= my_second_var; // true
+my_first_var >= my_second_var; // false
+```
+
+Les opérateurs de comparaison permettent de comparer deux variables.
+Il est possible d'enchaîner les opérateurs de comparaison.
+
 ## Tableaux
 
 ```
-my_first_array = [1, 2, 3, 4, 5];
+my_first_array = [1, 2, 3, 4, "hello", "you"];
 print(my_first_array[0]); // Affiche 1
 ```
 
