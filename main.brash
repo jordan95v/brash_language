@@ -10,4 +10,7 @@ function calculate(a, i)
     return a + i;
 endfunction;
 
+
+a, b = 2, 3;
+print("a", a, "b", b);
 print(1 < 2 <= 2 == 3);

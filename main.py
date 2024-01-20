@@ -225,6 +225,13 @@ def exec_bloc(bloc):
             return exec_expression(bloc[1])
         case "assign":
             variables[bloc[1]] = exec_expression(bloc[2])
+        case "multiple_assign":
+            variables_name = exec_get_variables_name_multi_assign([], bloc[1])
+            variables_name.reverse()
+            values = exec_assign_array([], bloc[2])
+            values.reverse()
+            for name, value in zip(variables_name, values):
+                variables[name] = value
         case "global_new":
             global_variables[bloc[1]] = exec_expression(bloc[2])
         case "global_exist":
@@ -261,6 +268,13 @@ def exec_bloc(bloc):
             ret = exec_bloc(bloc[1])
             ret_ = exec_bloc(bloc[2])
             return ret_ or ret
+
+
+def exec_get_variables_name_multi_assign(values, parameters):
+    values.append(parameters[1])
+    if parameters[2] == "empty":
+        return values
+    return exec_get_variables_name_multi_assign(values, parameters[2])
 
 
 def get_height(parameters):
@@ -527,6 +541,12 @@ def p_statement_return(p):
 ### Assignments
 
 
+def p_multiple_assign(p):
+    """statement : parameters EQUALS arguments"""
+
+    p[0] = ("multiple_assign", p[1], p[3])
+
+
 def p_statement_increment(p):
     """statement : NAME PLUSPLUS
     | NAME MINUSMINUS"""
@@ -641,7 +661,10 @@ lexer = lex.lex()
 
 from pathlib import Path
 
-a = yacc.parse(Path("main.brash").read_text())  # type: ignore
+try:
+    a = yacc.parse(Path("main.brash").read_text())  # type: ignore
+except Exception:
+    pass
 # a = yacc.parse("if 1<2 then a=5;b=0; endif;")  # type: ignore
 # print(variables)
 # a = yacc.parse("while b<a do b++;print(1); endwhile;")  # type: ignore
