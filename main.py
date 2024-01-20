@@ -50,6 +50,9 @@ tokens = (
     "EQUALS",
     "GREATER",
     "LESSER",
+    "EQUALSEQUALS",
+    "GREATEREQUALS",
+    "LESSEREQUALS",
     "PLUSPLUS",
     "MINUSMINUS",
     "PLUSEQUALS",
@@ -64,8 +67,7 @@ tokens = (
 ) + tuple(reserved.values())
 
 precedence = (
-    ("nonassoc", "GREATER", "LESSER"),
-    ("left", "PLUS", "MINUS", "OR"),
+    ("left", "PLUS", "MINUS", "OR", "GREATER", "LESSER"),
     ("right", "TIMES", "DIVIDE"),
 )
 
@@ -84,6 +86,9 @@ t_NAME = r"[a-zA-Z_][a-zA-Z0-9_]*"
 t_EQUALS = r"="
 t_GREATER = r">"
 t_LESSER = r"<"
+t_EQUALSEQUALS = r"=="
+t_GREATEREQUALS = r">="
+t_LESSEREQUALS = r"<="
 t_PLUSPLUS = r"\+\+"
 t_MINUSMINUS = r"--"
 t_PLUSEQUALS = r"\+="
@@ -363,6 +368,12 @@ def exec_expression(expression):
             return exec_expression(expression[1]) > exec_expression(expression[2])
         case "<":
             return exec_expression(expression[1]) < exec_expression(expression[2])
+        case "==":
+            return exec_expression(expression[1]) == exec_expression(expression[2])
+        case ">=":
+            return exec_expression(expression[1]) >= exec_expression(expression[2])
+        case "<=":
+            return exec_expression(expression[1]) <= exec_expression(expression[2])
         case "call":
             return exec_function_call(expression[1], expression[2])
         case "array_get":
@@ -410,7 +421,7 @@ def p_bloc(p):
 
 
 def p_error(p):
-    print(f"Syntax error at {p.value}")
+    print(f"Syntax error at line {p.lineno} : {p.value}")
 
 
 ### Utils
@@ -600,7 +611,11 @@ def p_expression_calc(p):
     | expression AND expression
     | expression OR expression
     | expression GREATER expression
-    | expression LESSER expression"""
+    | expression LESSER expression
+    | expression EQUALSEQUALS expression
+    | expression GREATEREQUALS expression
+    | expression LESSEREQUALS expression
+    """
 
     p[0] = (p[2], p[1], p[3])
 
