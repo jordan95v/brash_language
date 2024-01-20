@@ -4,21 +4,12 @@ function dunno()
     print("test");
 endfunction;
 
-for i= 0; i<7; i++
-do
-    print("romain");
-endfor;
-
 function calculate(a, i)
     dunno();
-    print('hello you');
+    print("hello you");
     return a + i;
 endfunction;
 
-a=calculate(1, 2);
-my_first_array = [1, 2, 3, 4, 5];
-print(my_first_array[0]); // Affiche 1
-for i = 0; i < 5; i++
-do
-    print(my_first_array[i]);
-endfor;
+a = [1, "salut", "yo"];
+print(a[0]);
+print("romain", 3, a);

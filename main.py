@@ -90,7 +90,7 @@ t_PLUSEQUALS = r"\+="
 t_MINUSEQUALS = r"-="
 t_TIMESEQUALS = r"\*="
 t_DIVIDEEQUALS = r"/="
-t_STRING = r"(\"|\').*(\"|\')"
+t_STRING = r"(\").[^\"]*(\")"
 t_COMMA = r","
 t_LEFT_ARRAY = r"\["
 t_RIGHT_ARRAY = r"\]"
@@ -235,7 +235,9 @@ def exec_bloc(bloc):
         case "fast_assign":
             exec_fast_assign(bloc[1], bloc[2])
         case "print":
-            print(exec_expression(bloc[1]))
+            values = exec_assign_array([], bloc[1])
+            values.reverse()
+            print(" ".join(map(str, values)))
         case "if":
             if exec_expression(bloc[1]):
                 exec_bloc(bloc[2])
@@ -422,8 +424,7 @@ def p_statement_exit(p):
 
 
 def p_statement_print(p):
-    """statement : PRINT LPAREN expression RPAREN
-    | PRINT LPAREN STRING RPAREN"""
+    "statement : PRINT LPAREN arguments RPAREN"
 
     p[0] = ("print", p[3])
 
@@ -476,6 +477,8 @@ def p_statement_parameters(p):
 
 def p_statement_call_arguments(p):
     """arguments : arguments COMMA expression
+    | arguments COMMA STRING
+    | STRING
     | expression"""
 
     if len(p) == 2:
