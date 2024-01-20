@@ -1,6 +1,13 @@
 function dunno()
     print("dunno");
+    return 1;
+    print("test");
 endfunction;
+
+for i= 0; i<7; i++
+do
+    print("romain");
+endfor;
 
 function calculate(a, i)
     dunno();
@@ -8,4 +15,10 @@ function calculate(a, i)
     return a + i;
 endfunction;
 
-calculate(1, 2);
+a=calculate(1, 2);
+my_first_array = [1, 2, 3, 4, 5];
+print(my_first_array[0]); // Affiche 1
+for i = 0; i < 5; i++
+do
+    print(my_first_array[i]);
+endfor;

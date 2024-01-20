@@ -228,7 +228,6 @@ def exec_bloc(bloc):
             new_list = exec_assign_array([], bloc[2])
             new_list.reverse()
             variables[bloc[1]] = new_list
-            print(variables)
         case "array_assign":
             variables[bloc[1]][exec_expression(bloc[2])] = exec_expression(bloc[3])
         case "increment":
@@ -254,7 +253,7 @@ def exec_bloc(bloc):
         case "bloc":
             ret = exec_bloc(bloc[1])
             ret_ = exec_bloc(bloc[2])
-            return ret or ret_
+            return ret_ or ret
 
 
 def get_height(parameters):
@@ -297,14 +296,14 @@ def exec_function_call(name, arguments):
 
 
 def exec_assign_array(values, arguments):
-    values.append(exec_expression(arguments[2]))
-    if arguments[1] == "empty":
+    values.append(exec_expression(arguments[1]))
+    if arguments[2] == "empty":
         return values
-    return exec_assign_array(values, arguments[1])
+    return exec_assign_array(values, arguments[2])
 
 
 def exec_index_array(values, indexs):
-    values.append(exec_expression(indexs[1][2]))
+    values.append(exec_expression(indexs[1][1]))
     if indexs[2] == "empty":
         return values
     return exec_index_array(values, indexs[2])
