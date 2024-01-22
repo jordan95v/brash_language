@@ -559,7 +559,8 @@ def p_statement_increment(p):
 
 
 def p_statement_assign(p):
-    "statement : NAME EQUALS expression"
+    """statement : NAME EQUALS expression
+    | NAME EQUALS STRING"""
 
     p[0] = ("assign", p[1], p[3])
 
@@ -571,7 +572,8 @@ def p_statement_global_exists(p):
 
 
 def p_statement_global(p):
-    "statement : GLOBAL NAME EQUALS expression"
+    """statement : GLOBAL NAME EQUALS expression
+    | GLOBAL NAME EQUALS STRING"""
 
     p[0] = ("global_new", p[2], p[4])
 
