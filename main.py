@@ -367,7 +367,6 @@ def exec_expression(expression):
             exit()
     if not isinstance(expression, tuple):
         return expression
-    print(expression)
     match (expression[0]):
         case "+":
             return exec_expression(expression[1]) + exec_expression(expression[2])

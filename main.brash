@@ -10,4 +10,7 @@ function calculate(a, i)
     return a + i;
 endfunction;
 
-print(2 != 3 < 2);
+a = [1, 2, "coucou"];
+b = [1, 2, [3, 4]];
+print(b[2][1]);
+print("Tableau a: ", a);
