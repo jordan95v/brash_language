@@ -222,6 +222,9 @@ def exec_bloc(bloc, config):
         case "call":
             return exec_function_call(bloc[1], bloc[2])
         case "return":
+            if not config.in_function:
+                print("Return statement outside of a function")
+                exit()
             config.returned = True
             return exec_expression(bloc[1])
         case "assign":
@@ -261,10 +264,10 @@ def exec_bloc(bloc, config):
             while exec_expression(bloc[1]):
                 return exec_bloc(bloc[2], config)
         case "for":
-            exec_bloc(bloc[1])
+            exec_bloc(bloc[1], config)
             while exec_expression(bloc[2]):
-                return exec_bloc(bloc[4], config)
-                return exec_bloc(bloc[3], config)
+                exec_bloc(bloc[4], config)
+                exec_bloc(bloc[3], config)
         case "bloc":
             ret = exec_bloc(bloc[1], config)
             ret_ = exec_bloc(bloc[2], config)
@@ -423,7 +426,7 @@ def p_start(p):
     """start : bloc"""
 
     p[0] = ("start", p[1])
-    config: Config = Config()
+    config = Config()
     exec_bloc(p[1], config)
 
 

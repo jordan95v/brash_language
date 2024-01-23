@@ -1,26 +1,14 @@
-global coucou = "hello";
 
-function dunno()
-    print(coucou);
-    print("dunno");
+function calc()
+    for i = 0; i < 10; i++
+    do
+        if i == 5
+        then
+            return i;
+        endif;
+    endfor;
 endfunction;
 
-function calculate(a, i)
-    dunno();
-    print("hello you");
-    return a + i;
-endfunction;
 
-function jordan(a)
-    if a > 2
-    then
-        return "jojo";
-    endif;
-    print(a);
-    a++;
-    jordan(a);
-endfunction;
-
-a = 0;
-res = jordan(a);
-print(res);
+a = calc();
+print(a);
