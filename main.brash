@@ -1,12 +1,11 @@
 
 function calc()
-    for i = 0; i < 10; i++
+    b = 0;
+    while b < 10
     do
-        if i == 5
-        then
-            return i;
-        endif;
-    endfor;
+        print(b);
+        b++;
+    endwhile;
 endfunction;
 
 

@@ -257,17 +257,22 @@ def exec_bloc(bloc, config):
         case "if":
             if exec_expression(bloc[1]):
                 return exec_bloc(bloc[2], config)
-            else:
-                if bloc[3] != "empty":
-                    return exec_bloc(bloc[3], config)
+            if bloc[3] != "empty":
+                return exec_bloc(bloc[3], config)
         case "while":
             while exec_expression(bloc[1]):
-                return exec_bloc(bloc[2], config)
+                res = exec_bloc(bloc[2], Config(config.in_function))
+                if res is not None:
+                    return res
         case "for":
+            res = None
             exec_bloc(bloc[1], config)
             while exec_expression(bloc[2]):
-                exec_bloc(bloc[4], config)
-                exec_bloc(bloc[3], config)
+                ret = exec_bloc(bloc[4], config)
+                if ret is not None:
+                    res = ret
+                exec_bloc(bloc[3], Config(config.in_function))
+            return res
         case "bloc":
             ret = exec_bloc(bloc[1], config)
             ret_ = exec_bloc(bloc[2], config)
