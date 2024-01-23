@@ -11,11 +11,16 @@ function calculate(a, i)
     return a + i;
 endfunction;
 
-a = 2;
-i = 0;
+function jordan(a)
+    if a > 2
+    then
+        return "jojo";
+    endif;
+    print(a);
+    a++;
+    jordan(a);
+endfunction;
 
-while i < a
-do 
-    print(i);
-    i++;
-endwhile;
+a = 0;
+res = jordan(a);
+print(res);

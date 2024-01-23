@@ -15,7 +15,6 @@ class Config:
 variables = {}
 global_variables = {}
 functions = {}
-config = Config()
 
 reserved = {
     "print": "PRINT",
@@ -214,7 +213,7 @@ def t_newline(t):
     t.lexer.lineno += len(t.value)
 
 
-def exec_bloc(bloc):
+def exec_bloc(bloc, config):
     if config.returned and config.in_function:
         return
     match (bloc[0]):
@@ -254,21 +253,21 @@ def exec_bloc(bloc):
             print(" ".join(map(str, values)))
         case "if":
             if exec_expression(bloc[1]):
-                exec_bloc(bloc[2])
+                return exec_bloc(bloc[2], config)
             else:
                 if bloc[3] != "empty":
-                    exec_bloc(bloc[3])
+                    return exec_bloc(bloc[3], config)
         case "while":
             while exec_expression(bloc[1]):
-                exec_bloc(bloc[2])
+                return exec_bloc(bloc[2], config)
         case "for":
             exec_bloc(bloc[1])
             while exec_expression(bloc[2]):
-                exec_bloc(bloc[4])
-                exec_bloc(bloc[3])
+                return exec_bloc(bloc[4], config)
+                return exec_bloc(bloc[3], config)
         case "bloc":
-            ret = exec_bloc(bloc[1])
-            ret_ = exec_bloc(bloc[2])
+            ret = exec_bloc(bloc[1], config)
+            ret_ = exec_bloc(bloc[2], config)
             return ret_ or ret
 
 
@@ -309,13 +308,14 @@ def exec_function_call(name, arguments):
     variables_copy = variables.copy()
     variables.clear()
     variables.update(variables_functions)
+    config = Config(True)
     config.in_function = True
-    a = exec_bloc(bloc)
+    res = exec_bloc(bloc, config)
     config.returned = False
     config.in_function = False
     variables.clear()
     variables.update(variables_copy)
-    return a
+    return res
 
 
 def exec_assign_array(values, arguments):
@@ -423,7 +423,8 @@ def p_start(p):
     """start : bloc"""
 
     p[0] = ("start", p[1])
-    exec_bloc(p[1])
+    config: Config = Config()
+    exec_bloc(p[1], config)
 
 
 def p_bloc(p):
@@ -537,7 +538,8 @@ def p_statement_call(p):
 
 
 def p_statement_return(p):
-    "statement : RETURN expression"
+    """statement : RETURN expression
+    | RETURN STRING"""
 
     p[0] = ("return", p[2])
 
