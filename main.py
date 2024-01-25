@@ -237,6 +237,24 @@ def handle_scope_variables(variables_copy):
     variables.update(variables_copy)
 
 
+def handle_array_method(method, bloc):
+    value = exec_expression(bloc[1])
+    try:
+        if isinstance(value, list):
+            getattr(value, method)(exec_expression(bloc[2]))
+        else:
+            getattr(variables[value], method)(exec_expression(bloc[2]))
+    except KeyError:
+        try:
+            getattr(global_variables[value], method)(exec_expression(bloc[2]))
+        except KeyError:
+            handle_error(f"Variable {bloc[1]} not found")
+    except ValueError:
+        handle_error(f"Value {exec_expression(bloc[2])} not found in array {bloc[1]}")
+    except AttributeError:
+        handle_error(f"Variable {bloc[1]} is not an array")
+
+
 def exec_bloc(bloc, config):
     if config.returned and config.in_function:
         return
@@ -271,33 +289,9 @@ def exec_bloc(bloc, config):
         case "array_assign":
             variables[bloc[1]][exec_expression(bloc[2])] = exec_expression(bloc[3])
         case "array_append":
-            try:
-                value = exec_expression(bloc[1])
-                if isinstance(value, list):
-                    value.append(exec_expression(bloc[2]))
-                else:
-                    variables[value].append(exec_expression(bloc[2]))
-            except KeyError:
-                try:
-                    global_variables[bloc[1]].append(exec_expression(bloc[2]))
-                except KeyError:
-                    handle_error(f"Variable {bloc[1]} not found")
-            except AttributeError:
-                handle_error(f"Variable {bloc[1]} is not an array")
+            handle_array_method("append", bloc)
         case "array_remove":
-            try:
-                variables[bloc[1]].remove(exec_expression(bloc[2]))
-            except KeyError:
-                try:
-                    global_variables[bloc[1]].remove(exec_expression(bloc[2]))
-                except KeyError:
-                    handle_error(f"Variable {bloc[1]} not found")
-            except ValueError:
-                handle_error(
-                    f"Value {exec_expression(bloc[2])} not found in array {bloc[1]}"
-                )
-            except AttributeError:
-                handle_error(f"Variable {bloc[1]} is not an array")
+            handle_array_method("remove", bloc)
         case "increment":
             exec_increment(bloc[1], bloc[2])
         case "fast_assign":
@@ -664,7 +658,7 @@ def p_statement_array_append(p):
 
 
 def p_statement_array_remove(p):
-    "statement : REMOVE LPAREN NAME COMMA expression RPAREN"
+    "statement : REMOVE LPAREN expression COMMA expression RPAREN"
 
     p[0] = ("array_remove", p[3], p[5])
 
