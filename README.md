@@ -13,10 +13,12 @@ Ce dernier prend inspiration du langage Bash et du python.
   - [Opérateurs et sucre syntaxique](#opérateurs-et-sucre-syntaxique)
     - [Opérateurs de comparaison](#opérateurs-de-comparaison)
   - [Tableaux](#tableaux)
+    - [Méthodes de tableaux](#méthodes-de-tableaux)
   - [Conditions](#conditions)
   - [Boucles](#boucles)
     - [Boucle while](#boucle-while)
     - [Boucle for](#boucle-for)
+  - [Scope des variables](#scope-des-variables)
   - [Fonctions](#fonctions)
   - [Commentaires](#commentaires)
   - [Exemple de code complet](#exemple-de-code-complet)
@@ -107,7 +109,18 @@ print(my_first_array[0]); // Affiche 1
 Les tableaux sont déclarés avec des crochets `[]`. Ils peuvent contenir des nombres, des chaînes de caractères ou la valeur de variables.
 Pour accéder à une valeur, on utilise des crochets `[]` après le nom du tableau et on met l'index de la valeur à l'intérieur.
 Les index commencent à 0.
-Les tableaux ont une taille fixe, mais sont multidimensionnels.
+
+### Méthodes de tableaux
+
+Certains méthodes sont disponibles pour les tableaux.
+
+```
+my_first_array = [1, 2, 3, 4, "hello", "you"];
+my_first_array.append(5); // Ajoute 5 à la fin du tableau
+my_first_array.remove(2); // Supprime la première occurence de 2
+```
+
+On peut ajouter n'importe quel type de valeur à un tableau. Même un autre tableau.
 
 ## Conditions
 
@@ -149,6 +162,18 @@ endfor;
 Le premier paramètre est le bloc d'initialisation, le deuxième est la condition et le troisième est le bloc d'incrémentation.
 Bloc fait référence au code entre les `;`.
 
+## Scope des variables
+
+Les variables qui sont instanciées dans une boucle ou une condition sont locales à cette boucle ou cette condition.
+
+```
+for i=0; i<10; i++
+do
+    my_var = 5;
+endfor;
+print(my_var); // Erreur, my_var n'existe pas
+```
+
 ## Fonctions
 
 ```
@@ -166,6 +191,7 @@ endfunction;
 
 Les fonctions sont déclarées avec le mot clé `function` et se termine avec le mot clé `endfunction`.
 Les paramètres sont séparés par des virgules.
+Le mot clé `return` permet de retourner une valeur, et est coupe-circuit, c'est à dire que le code après le `return` ne sera pas exécuté.
 
 ## Commentaires
 

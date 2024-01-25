@@ -262,8 +262,6 @@ def exec_bloc(bloc, config):
     match (bloc[0]):
         case "function":
             functions[bloc[1]] = (bloc[2], bloc[3])
-        case "call":
-            return exec_function_call(bloc[1], bloc[2])
         case "return":
             if not config.in_function:
                 handle_error("Return statement outside of a function")
@@ -585,7 +583,7 @@ def p_statement_function(p):
         p[0] = ("function", p[2], p[4], p[6])
 
 
-def p_statement_call(p):
+def p_expression_call(p):
     """expression : NAME LPAREN arguments RPAREN
     | NAME LPAREN RPAREN"""
 
