@@ -12,8 +12,8 @@ class Config:
     returned: bool = False
 
 
-variables = {}
-global_variables = {}
+variables = {}  # type: ignore
+global_variables = {}  # type: ignore
 functions = {}
 
 reserved = {
@@ -455,6 +455,8 @@ def exec_expression(expression):
                 value = variables[expression[1]]
             elif global_variables.get(expression[1]):
                 value = global_variables[expression[1]]
+            else:
+                handle_error(f"Variable {expression[1]} not found")
             for i in new_list:
                 try:
                     value = value[i]
@@ -470,6 +472,8 @@ def exec_expression(expression):
                     handle_error(f"Variable {expression[1]}{error_list_str} not found")
             return value
         case "array":
+            if expression[1] == "empty":
+                return []
             new_list = exec_assign_array([], expression[1])
             new_list.reverse()
             return new_list
@@ -678,9 +682,13 @@ def p_statement_fast_assign(p):
 
 
 def p_expression_array(p):
-    "expression : LEFT_ARRAY arguments RIGHT_ARRAY"
+    """expression : LEFT_ARRAY arguments RIGHT_ARRAY
+    | LEFT_ARRAY RIGHT_ARRAY"""
 
-    p[0] = ("array", p[2], "empty")
+    if len(p) == 4:
+        p[0] = ("array", p[2], "empty")
+    else:
+        p[0] = ("array", "empty", "empty")
 
 
 def p_expression_array_index(p):

@@ -1,7 +1,41 @@
+global z = 3;
+
+function fibo(n)
+    if n <= 1
+    then
+        return n;
+    endif;
+    return fibo(n-1) + fibo(n-2);
+endfunction;
+
 function calc(a, i)
     return a + i;
     print("coucou, mon return est coupe circuit.");
 endfunction;
 
 a = calc(1, 2);
-print(a);
+print("Variable a:", a);
+
+tab = [];
+append(tab, 2);
+append(tab, [1, 4]);
+print("Tableau tab après deux append :", tab);
+remove(tab, 2);
+print("Tableau tab après un remove :", tab);
+
+if a == 3
+then
+    print("La variable a est égale à 3.");
+else
+    print("EN fait non");
+endif;
+
+b, c = 2, 3;
+print("Variable b:", b, "Variable c:", c);
+
+for i = 0; i < 10; i++
+do
+    print("Calcul de", i, "+ 2 * i:", calc(i, 2 * i));
+endfor;
+
+print(fibo(10));
