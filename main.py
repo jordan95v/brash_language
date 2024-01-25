@@ -33,6 +33,7 @@ reserved = {
     "return": "RETURN",
     "global": "GLOBAL",
     "append": "APPEND",
+    "remove": "REMOVE",
 }
 
 tokens = (
@@ -204,6 +205,12 @@ def t_append(t):
     return t
 
 
+def t_remove(t):
+    r"remove"
+    t.type = reserved.get(t.value, "REMOVE")
+    return t
+
+
 def t_GLOBAL(t):
     r"global"
     t.type = reserved.get(t.value, "GLOBAL")
@@ -268,6 +275,21 @@ def exec_bloc(bloc, config):
                 except KeyError:
                     print(f"Variable {bloc[1]} not found")
                     exit()
+            except AttributeError:
+                print(f"Variable {bloc[1]} is not an array")
+                exit()
+        case "array_remove":
+            try:
+                variables[bloc[1]].remove(exec_expression(bloc[2]))
+            except KeyError:
+                try:
+                    global_variables[bloc[1]].remove(exec_expression(bloc[2]))
+                except KeyError:
+                    print(f"Variable {bloc[1]} not found")
+                    exit()
+            except ValueError:
+                print(f"Value {exec_expression(bloc[2])} not found in array {bloc[1]}")
+                exit()
             except AttributeError:
                 print(f"Variable {bloc[1]} is not an array")
                 exit()
@@ -639,6 +661,12 @@ def p_statement_array_append(p):
     "statement : APPEND LPAREN NAME COMMA expression RPAREN"
 
     p[0] = ("array_append", p[3], p[5])
+
+
+def p_statement_array_remove(p):
+    "statement : REMOVE LPAREN NAME COMMA expression RPAREN"
+
+    p[0] = ("array_remove", p[3], p[5])
 
 
 def p_statement_fast_assign(p):
