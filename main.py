@@ -213,9 +213,15 @@ def t_newline(t):
     t.lexer.lineno += len(t.value)
 
 
+def handle_scope_variables(variables_copy):
+    variables.clear()
+    variables.update(variables_copy)
+
+
 def exec_bloc(bloc, config):
     if config.returned and config.in_function:
         return
+    temporary_variables = variables.copy()
     match (bloc[0]):
         case "function":
             functions[bloc[1]] = (bloc[2], bloc[3])
@@ -256,14 +262,20 @@ def exec_bloc(bloc, config):
             print(" ".join(map(str, values)))
         case "if":
             if exec_expression(bloc[1]):
-                return exec_bloc(bloc[2], config)
+                res = exec_bloc(bloc[2], config)
+                handle_scope_variables(temporary_variables)
+                return res
             if bloc[3] != "empty":
-                return exec_bloc(bloc[3], config)
+                res = exec_bloc(bloc[3], config)
+                handle_scope_variables(temporary_variables)
+                return res
         case "while":
             while exec_expression(bloc[1]):
                 res = exec_bloc(bloc[2], Config(config.in_function))
                 if res is not None:
+                    handle_scope_variables(temporary_variables)
                     return res
+            handle_scope_variables(temporary_variables)
         case "for":
             res = None
             exec_bloc(bloc[1], config)
@@ -272,6 +284,7 @@ def exec_bloc(bloc, config):
                 if ret is not None:
                     res = ret
                 exec_bloc(bloc[3], Config(config.in_function))
+            handle_scope_variables(temporary_variables)
             return res
         case "bloc":
             ret = exec_bloc(bloc[1], config)
@@ -314,15 +327,13 @@ def exec_function_call(name, arguments):
     if arguments != "empty" and parameters != "empty":
         exec_get_signature(parameters, arguments, variables_functions)
     variables_copy = variables.copy()
-    variables.clear()
-    variables.update(variables_functions)
+    handle_scope_variables(variables_functions)
     config = Config(True)
     config.in_function = True
     res = exec_bloc(bloc, config)
     config.returned = False
     config.in_function = False
-    variables.clear()
-    variables.update(variables_copy)
+    handle_scope_variables(variables_copy)
     return res
 
 
