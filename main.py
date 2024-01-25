@@ -272,7 +272,11 @@ def exec_bloc(bloc, config):
             variables[bloc[1]][exec_expression(bloc[2])] = exec_expression(bloc[3])
         case "array_append":
             try:
-                variables[bloc[1]].append(exec_expression(bloc[2]))
+                value = exec_expression(bloc[1])
+                if isinstance(value, list):
+                    value.append(exec_expression(bloc[2]))
+                else:
+                    variables[value].append(exec_expression(bloc[2]))
             except KeyError:
                 try:
                     global_variables[bloc[1]].append(exec_expression(bloc[2]))
@@ -654,7 +658,7 @@ def p_statement_array_assign(p):
 
 
 def p_statement_array_append(p):
-    "statement : APPEND LPAREN NAME COMMA expression RPAREN"
+    "statement : APPEND LPAREN expression COMMA expression RPAREN"
 
     p[0] = ("array_append", p[3], p[5])
 
