@@ -34,6 +34,7 @@ reserved = {
     "global": "GLOBAL",
     "append": "APPEND",
     "remove": "REMOVE",
+    "id": "ID",
 }
 
 tokens = (
@@ -199,13 +200,13 @@ def t_COMMENT(t):
     pass
 
 
-def t_append(t):
+def t_APPEND(t):
     r"append"
     t.type = reserved.get(t.value, "APPEND")
     return t
 
 
-def t_remove(t):
+def t_REMOVE(t):
     r"remove"
     t.type = reserved.get(t.value, "REMOVE")
     return t
@@ -214,6 +215,12 @@ def t_remove(t):
 def t_GLOBAL(t):
     r"global"
     t.type = reserved.get(t.value, "GLOBAL")
+    return t
+
+
+def t_ID(t):
+    r"id"
+    t.type = reserved.get(t.value, "ID")
     return t
 
 
@@ -424,6 +431,8 @@ def exec_expression(expression):
     if not isinstance(expression, tuple):
         return expression
     match (expression[0]):
+        case "id":
+            return id(exec_expression(expression[1]))
         case "+":
             return exec_expression(expression[1]) + exec_expression(expression[2])
         case "-":
@@ -681,6 +690,12 @@ def p_statement_fast_assign(p):
 
 
 ### Expressions
+
+
+def p_id(p):
+    "expression : ID LPAREN expression RPAREN"
+
+    p[0] = ("id", p[3])
 
 
 def p_expression_array(p):
