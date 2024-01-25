@@ -452,7 +452,11 @@ def exec_expression(expression):
             return exec_function_call(expression[1], expression[2])
         case "array_get":
             new_list = exec_index_array([], expression[2])
-            value = variables[expression[1]]
+            value = None
+            if variables.get(expression[1]):
+                value = variables[expression[1]]
+            elif global_variables.get(expression[1]):
+                value = global_variables[expression[1]]
             for i in new_list:
                 try:
                     value = value[i]

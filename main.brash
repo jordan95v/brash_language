@@ -1,13 +1,6 @@
+global tab=[0, [1, 2]];
+tab2 = [4,5,6, [2]];
 
-function calc()
-    b = 0;
-    while b < 10
-    do
-        print(b);
-        b++;
-    endwhile;
-endfunction;
+append(tab[1], tab2);
 
-
-a = calc();
-print(a);
+print(tab);
