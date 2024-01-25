@@ -32,6 +32,7 @@ reserved = {
     "endfunction": "ENDFUNCTION",
     "return": "RETURN",
     "global": "GLOBAL",
+    "append": "APPEND",
 }
 
 tokens = (
@@ -197,6 +198,12 @@ def t_COMMENT(t):
     pass
 
 
+def t_append(t):
+    r"append"
+    t.type = reserved.get(t.value, "APPEND")
+    return t
+
+
 def t_GLOBAL(t):
     r"global"
     t.type = reserved.get(t.value, "GLOBAL")
@@ -247,11 +254,23 @@ def exec_bloc(bloc, config):
         case "global_exist":
             global_variables[bloc[1]] = variables[bloc[1]]
         case "array":
-            new_list = exec_assign_array([], bloc[2])
+            new_list = exec_assign_array([], bloc[2]) if bloc[2] != "empty" else []
             new_list.reverse()
             variables[bloc[1]] = new_list
         case "array_assign":
             variables[bloc[1]][exec_expression(bloc[2])] = exec_expression(bloc[3])
+        case "array_append":
+            try:
+                variables[bloc[1]].append(exec_expression(bloc[2]))
+            except KeyError:
+                try:
+                    global_variables[bloc[1]].append(exec_expression(bloc[2]))
+                except KeyError:
+                    print(f"Variable {bloc[1]} not found")
+                    exit()
+            except AttributeError:
+                print(f"Variable {bloc[1]} is not an array")
+                exit()
         case "increment":
             exec_increment(bloc[1], bloc[2])
         case "fast_assign":
@@ -614,6 +633,12 @@ def p_statement_array_assign(p):
     "statement : NAME LEFT_ARRAY expression RIGHT_ARRAY EQUALS expression"
 
     p[0] = ("array_assign", p[1], p[3], p[6])
+
+
+def p_statement_array_append(p):
+    "statement : APPEND LPAREN NAME COMMA expression RPAREN"
+
+    p[0] = ("array_append", p[3], p[5])
 
 
 def p_statement_fast_assign(p):
