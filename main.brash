@@ -13,6 +13,10 @@ function calc(a, i)
     print("coucou, mon return est coupe circuit.");
 endfunction;
 
+function add()
+    print("qbdqdfq");
+endfunction;
+
 a = calc(1, 2);
 print("Variable a:", a);
 
@@ -39,3 +43,7 @@ do
 endfor;
 
 print(fibo(10));
+
+print(tab);
+print(tab);
+add();
