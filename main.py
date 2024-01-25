@@ -227,6 +227,11 @@ def t_newline(t):
     t.lexer.lineno += len(t.value)
 
 
+def handle_error(error):
+    print(error)
+    exit()
+
+
 def handle_scope_variables(variables_copy):
     variables.clear()
     variables.update(variables_copy)
@@ -243,8 +248,7 @@ def exec_bloc(bloc, config):
             return exec_function_call(bloc[1], bloc[2])
         case "return":
             if not config.in_function:
-                print("Return statement outside of a function")
-                exit()
+                handle_error("Return statement outside of a function")
             config.returned = True
             return exec_expression(bloc[1])
         case "assign":
@@ -273,11 +277,9 @@ def exec_bloc(bloc, config):
                 try:
                     global_variables[bloc[1]].append(exec_expression(bloc[2]))
                 except KeyError:
-                    print(f"Variable {bloc[1]} not found")
-                    exit()
+                    handle_error(f"Variable {bloc[1]} not found")
             except AttributeError:
-                print(f"Variable {bloc[1]} is not an array")
-                exit()
+                handle_error(f"Variable {bloc[1]} is not an array")
         case "array_remove":
             try:
                 variables[bloc[1]].remove(exec_expression(bloc[2]))
@@ -285,14 +287,13 @@ def exec_bloc(bloc, config):
                 try:
                     global_variables[bloc[1]].remove(exec_expression(bloc[2]))
                 except KeyError:
-                    print(f"Variable {bloc[1]} not found")
-                    exit()
+                    handle_error(f"Variable {bloc[1]} not found")
             except ValueError:
-                print(f"Value {exec_expression(bloc[2])} not found in array {bloc[1]}")
-                exit()
+                handle_error(
+                    f"Value {exec_expression(bloc[2])} not found in array {bloc[1]}"
+                )
             except AttributeError:
-                print(f"Variable {bloc[1]} is not an array")
-                exit()
+                handle_error(f"Variable {bloc[1]} is not an array")
         case "increment":
             exec_increment(bloc[1], bloc[2])
         case "fast_assign":
@@ -357,13 +358,11 @@ def exec_function_call(name, arguments):
     try:
         parameters, bloc = functions[name]
     except KeyError:
-        print(f"Function {name} not found")
-        exit()
+        handle_error(f"Function {name} not found")
     if arguments == "empty" and parameters == "empty":
         pass
     elif get_height(parameters) != get_height(arguments):
-        print(f"Wrong number of arguments for function {name}")
-        exit()
+        handle_error(f"Wrong number of arguments for function {name}")
     variables_functions = {}
     if arguments != "empty" and parameters != "empty":
         exec_get_signature(parameters, arguments, variables_functions)
@@ -423,8 +422,7 @@ def exec_expression(expression):
                 pass
             if expression.count('"') == 2 or expression.count("'") == 2:
                 return expression[1:-1]
-            print(f"Variable {expression} not found")
-            exit()
+            handle_error(f"Variable {expression} not found")
     if not isinstance(expression, tuple):
         return expression
     match (expression[0]):
@@ -464,14 +462,12 @@ def exec_expression(expression):
                     try:
                         value = global_variables[expression[1]][i]
                     except KeyError:
-                        print(f"Variable {expression[1]} not found")
-                        exit()
+                        handle_error(f"Variable {expression[1]} not found")
                 except TypeError:
                     error_list_str = ""
                     for i in new_list:
                         error_list_str += f"[{i}]"
-                    print(f"Variable {expression[1]}{error_list_str} not found")
-                    exit()
+                    handle_error(f"Variable {expression[1]}{error_list_str} not found")
             return value
         case "array":
             new_list = exec_assign_array([], expression[1])
