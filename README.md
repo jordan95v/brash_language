@@ -116,8 +116,8 @@ Certains méthodes sont disponibles pour les tableaux.
 
 ```
 my_first_array = [1, 2, 3, 4, "hello", "you"];
-my_first_array.append(5); // Ajoute 5 à la fin du tableau
-my_first_array.remove(2); // Supprime la première occurence de 2
+append(my_first_array, 5); // Ajoute 5 à la fin du tableau
+remove(my_first_array, 2); // Supprime la première occurence de 2
 ```
 
 On peut ajouter n'importe quel type de valeur à un tableau. Même un autre tableau.
