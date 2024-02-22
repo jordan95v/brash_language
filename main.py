@@ -35,6 +35,7 @@ reserved = {
     "append": "APPEND",
     "remove": "REMOVE",
     "id": "ID",
+    "eval": "EVAL",
 }
 
 tokens = (
@@ -221,6 +222,12 @@ def t_GLOBAL(t):
 def t_ID(t):
     r"id"
     t.type = reserved.get(t.value, "ID")
+    return t
+
+
+def t_EVAL(t):
+    r"eval"
+    t.type = reserved.get(t.value, "EVAL")
     return t
 
 
@@ -488,6 +495,8 @@ def exec_expression(expression):
             new_list = exec_assign_array([], expression[1])
             new_list.reverse()
             return new_list
+        case "eval":
+            return eval(exec_expression(expression[1]))
 
 
 def p_start(p):
@@ -722,6 +731,13 @@ def p_expression_array_get(p):
     "expression : NAME index"
 
     p[0] = ("array_get", p[1], p[2])
+    
+
+def p_expression_eval(p):
+    """expression : EVAL LPAREN expression RPAREN
+    | EVAL LPAREN STRING RPAREN"""
+
+    p[0] = ("eval", p[3])
 
 
 def p_expression_calc(p):

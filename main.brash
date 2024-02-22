@@ -47,3 +47,6 @@ print(fibo(10));
 print(tab);
 print(tab);
 add();
+
+calculus = "1 + 2 * 3";
+print("Résultat de eval avec(", calculus, "):", eval(calculus));
