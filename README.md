@@ -6,25 +6,22 @@ Ce dernier prend inspiration du langage Bash et du python.
 
 <h1>Table des matières</h1>
 
-- [Exemple de code Brash](#exemple-de-code-brash)
-  - [Hello world](#hello-world)
-  - [Déclaration et affichage de variable](#déclaration-et-affichage-de-variable)
-  - [Variables globales et locales](#variables-globales-et-locales)
-  - [Opérateurs et sucre syntaxique](#opérateurs-et-sucre-syntaxique)
-    - [Opérateurs de comparaison](#opérateurs-de-comparaison)
-  - [Tableaux](#tableaux)
-    - [Méthodes de tableaux](#méthodes-de-tableaux)
-  - [Conditions](#conditions)
-  - [Boucles](#boucles)
-    - [Boucle while](#boucle-while)
-    - [Boucle for](#boucle-for)
-  - [Scope des variables](#scope-des-variables)
-  - [Fonctions](#fonctions)
-  - [Commentaires](#commentaires)
-  - [Exemple de code complet](#exemple-de-code-complet)
+- [Hello world](#hello-world)
+- [Déclaration et affichage de variable](#déclaration-et-affichage-de-variable)
+- [Variables globales et locales](#variables-globales-et-locales)
+- [Opérateurs et sucre syntaxique](#opérateurs-et-sucre-syntaxique)
+  - [Opérateurs de comparaison](#opérateurs-de-comparaison)
+- [Tableaux](#tableaux)
+  - [Méthodes de tableaux](#méthodes-de-tableaux)
+- [Conditions](#conditions)
+- [Boucles](#boucles)
+  - [Boucle while](#boucle-while)
+  - [Boucle for](#boucle-for)
+- [Scope des variables](#scope-des-variables)
+- [Fonctions](#fonctions)
+- [Commentaires](#commentaires)
+- [Exemple de code complet](#exemple-de-code-complet)
 
-
-# Exemple de code Brash
 
 ## Hello world
 
